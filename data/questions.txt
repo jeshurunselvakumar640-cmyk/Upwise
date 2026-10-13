@@ -1,0 +1,163 @@
+18
+101
+C Programming
+Which format specifier is standard for printing a memory address in C?
+%x
+%p
+%u
+%d
+1
+Easy
+102
+C Programming
+What is the return type of the malloc() function in C?
+int*
+char*
+void*
+size_t
+2
+Easy
+103
+C Programming
+Which header file is required to use the 'bool' type in C99?
+<stdbool.h>
+<boolean.h>
+<stdlib.h>
+<stdio.h>
+0
+Easy
+104
+C Programming
+What is the result of dereferencing a NULL pointer in C?
+Returns 0
+Undefined behaviour / Segmentation fault
+Throws an exception
+Allocates memory
+1
+Medium
+105
+C Programming
+Which standard function is used to free heap-allocated memory in C?
+delete()
+destroy()
+free()
+dealloc()
+2
+Easy
+106
+C Programming
+What does the 'sizeof' operator evaluate to in C?
+size_t
+int
+long long
+unsigned short
+0
+Medium
+201
+Data Structures
+Which data structure follows the LIFO (Last In First Out) principle?
+Queue
+Stack
+Binary Tree
+Heap
+1
+Easy
+202
+Data Structures
+What is the average time complexity of Quicksort?
+O(n)
+O(n^2)
+O(n log n)
+O(log n)
+2
+Medium
+203
+Data Structures
+What is the time complexity to insert a new node at the head of a singly linked list?
+O(1)
+O(n)
+O(log n)
+O(n log n)
+0
+Easy
+204
+Data Structures
+Which data structure operates strictly on a FIFO (First In First Out) basis?
+Stack
+Priority Queue
+Queue
+Binary Search Tree
+2
+Easy
+205
+Data Structures
+What is the maximum number of children any node can possess in a binary tree?
+1
+2
+3
+Unlimited
+1
+Easy
+206
+Data Structures
+Which searching algorithm requires the input array to be pre-sorted?
+Linear Search
+Binary Search
+Hash Lookup
+Breadth First Search
+1
+Medium
+301
+Computer Fundamentals
+How many bits comprise one standard byte in modern computing?
+4 bits
+8 bits
+16 bits
+32 bits
+1
+Easy
+302
+Computer Fundamentals
+Which hardware component is primarily known as the brain of the computer?
+RAM
+GPU
+CPU
+SSD
+2
+Easy
+303
+Computer Fundamentals
+Which memory type is volatile and loses its data when powered off?
+ROM
+RAM
+Hard Disk Drive
+Flash EEPROM
+1
+Easy
+304
+Computer Fundamentals
+What is the primary role of the Operating System kernel?
+Web browsing
+Managing hardware and system resources
+Compiling code
+Rendering 3D graphics
+1
+Medium
+305
+Computer Fundamentals
+What does the acronym ALU stand for in processor architecture?
+Arithmetic Logic Unit
+Advanced Linking Utility
+Application Layer Unit
+Array Line Unit
+0
+Easy
+306
+Computer Fundamentals
+Which base numbering system utilizes digits 0-9 and letters A-F?
+Binary (Base 2)
+Octal (Base 8)
+Decimal (Base 10)
+Hexadecimal (Base 16)
+3
+Easy

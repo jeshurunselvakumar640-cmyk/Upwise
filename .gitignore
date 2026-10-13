@@ -1,0 +1,17 @@
+# Binaries and executables
+*.exe
+*.o
+*.obj
+Upwise.exe
+UpwiseServer.exe
+tests/*.exe
+tests/test_*.txt
+
+# Editor and IDE directories
+.vscode/
+.idea/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store

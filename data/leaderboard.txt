@@ -1,0 +1,7 @@
+Sophia Martinez|CS-2024-001|92|14
+Ethan Reynolds|CS-2024-012|87|11
+Aarav Sharma|CS-2024-034|81|9
+Maya Patel|CS-2024-055|76|7
+Liam Chen|CS-2024-082|68|5
+Chloe Dubois|CS-2024-099|54|4
+Jeshurun Selvakumar|125A100002|33|1
