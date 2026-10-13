@@ -113,29 +113,23 @@ Upwise/
 
 ### Command Line / PowerShell
 
-1. **Build All Targets**:
+1. **Build the Desktop Application & Tests**:
    ```cmd
    build.bat
    ```
-   *Compiles the High-DPI desktop app (`Upwise.exe`), localhost server (`UpwiseServer.exe`), and tests.*
+   *Compiles `Upwise.exe` with High-DPI anti-aliased TrueType font engine and tests.*
 
 2. **Run Desktop Application**:
    ```cmd
    build.bat run
    ```
-   *Or execute `.\Upwise.exe` directly (features crisp High-DPI Segoe UI TrueType typography).*
+   *Or run `.\Upwise.exe` directly.*
 
-3. **Open in Browser via Localhost (http://localhost:8080)**:
-   ```cmd
-   build.bat web
-   ```
-   *Starts the local C HTTP server and automatically opens Upwise in your web browser!*
-
-4. **Run All Automated Tests**:
+3. **Run All Automated Tests**:
    ```cmd
    build.bat test
    ```
-   *Executes all 30 data structure unit tests and integration tests.*
+   *Executes all 30 data structure unit tests and persistence integration tests.*
 
 4. **Clean Binaries**:
    ```cmd
