@@ -1,4 +1,4 @@
-// Upwise Web Client with Firebase Cloud Database Connectivity
+// Upwise Web Client with Firebase Cloud Database Connectivity & Vercel Standalone Support
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 import { 
@@ -33,18 +33,135 @@ let isFirebaseOnline = false;
 
 try {
   fbApp = initializeApp(firebaseConfig);
-  try { analytics = getAnalytics(fbApp); } catch (e) { /* analytics optional in local context */ }
+  try { analytics = getAnalytics(fbApp); } catch (e) { /* analytics optional in web context */ }
   db = getFirestore(fbApp);
   isFirebaseOnline = true;
-  console.log("[Firebase] Successfully initialized Firebase & Firestore:", firebaseConfig.projectId);
+  console.log("[Firebase] Successfully connected to Firebase & Cloud Firestore:", firebaseConfig.projectId);
 } catch (err) {
   console.warn("[Firebase] Initialization failed, operating in local offline fallback mode:", err);
   isFirebaseOnline = false;
 }
 
+// Predefined 18 Academic Questions for Standalone Cloud / Vercel Execution
+const DEFAULT_QUESTIONS = [
+  // C Programming
+  {
+    id: 101, topic: "C Programming",
+    text: "Which format specifier is standard for printing a memory address in C?",
+    options: ["%x", "%p", "%u", "%d"],
+    correct_index: 1, difficulty: "Easy"
+  },
+  {
+    id: 102, topic: "C Programming",
+    text: "What is the return type of the malloc() function in C?",
+    options: ["int*", "char*", "void*", "size_t"],
+    correct_index: 2, difficulty: "Easy"
+  },
+  {
+    id: 103, topic: "C Programming",
+    text: "Which header file is required to use the 'bool' type in C99?",
+    options: ["<stdbool.h>", "<boolean.h>", "<stdlib.h>", "<stdio.h>"],
+    correct_index: 0, difficulty: "Easy"
+  },
+  {
+    id: 104, topic: "C Programming",
+    text: "What is the result of dereferencing a NULL pointer in C?",
+    options: ["Returns 0", "Undefined behaviour / Segmentation fault", "Throws an exception", "Allocates memory"],
+    correct_index: 1, difficulty: "Medium"
+  },
+  {
+    id: 105, topic: "C Programming",
+    text: "Which standard function is used to free heap-allocated memory in C?",
+    options: ["delete()", "destroy()", "free()", "dealloc()"],
+    correct_index: 2, difficulty: "Easy"
+  },
+  {
+    id: 106, topic: "C Programming",
+    text: "What does the 'sizeof' operator evaluate to in C?",
+    options: ["size_t", "int", "long long", "unsigned short"],
+    correct_index: 0, difficulty: "Medium"
+  },
+
+  // Data Structures
+  {
+    id: 201, topic: "Data Structures",
+    text: "Which data structure follows the LIFO (Last In First Out) principle?",
+    options: ["Queue", "Stack", "Binary Tree", "Heap"],
+    correct_index: 1, difficulty: "Easy"
+  },
+  {
+    id: 202, topic: "Data Structures",
+    text: "What is the average time complexity of Quicksort?",
+    options: ["O(n)", "O(n^2)", "O(n log n)", "O(log n)"],
+    correct_index: 2, difficulty: "Medium"
+  },
+  {
+    id: 203, topic: "Data Structures",
+    text: "What is the time complexity to insert a new node at the head of a singly linked list?",
+    options: ["O(1)", "O(n)", "O(log n)", "O(n log n)"],
+    correct_index: 0, difficulty: "Easy"
+  },
+  {
+    id: 204, topic: "Data Structures",
+    text: "Which data structure operates strictly on a FIFO (First In First Out) basis?",
+    options: ["Stack", "Priority Queue", "Queue", "Binary Search Tree"],
+    correct_index: 2, difficulty: "Easy"
+  },
+  {
+    id: 205, topic: "Data Structures",
+    text: "What is the maximum number of children any node can possess in a binary tree?",
+    options: ["1", "2", "3", "Unlimited"],
+    correct_index: 1, difficulty: "Easy"
+  },
+  {
+    id: 206, topic: "Data Structures",
+    text: "Which searching algorithm requires the input array to be pre-sorted?",
+    options: ["Linear Search", "Binary Search", "Hash Lookup", "Breadth First Search"],
+    correct_index: 1, difficulty: "Medium"
+  },
+
+  // Computer Fundamentals
+  {
+    id: 301, topic: "Computer Fundamentals",
+    text: "How many bits comprise one standard byte in modern computing?",
+    options: ["4 bits", "8 bits", "16 bits", "32 bits"],
+    correct_index: 1, difficulty: "Easy"
+  },
+  {
+    id: 302, topic: "Computer Fundamentals",
+    text: "Which hardware component is primarily known as the brain of the computer?",
+    options: ["RAM", "GPU", "CPU", "SSD"],
+    correct_index: 2, difficulty: "Easy"
+  },
+  {
+    id: 303, topic: "Computer Fundamentals",
+    text: "Which memory type is volatile and loses its data when powered off?",
+    options: ["ROM", "RAM", "Hard Disk Drive", "Flash EEPROM"],
+    correct_index: 1, difficulty: "Easy"
+  },
+  {
+    id: 304, topic: "Computer Fundamentals",
+    text: "What is the primary role of the Operating System kernel?",
+    options: ["Web browsing", "Managing hardware and system resources", "Compiling code", "Rendering 3D graphics"],
+    correct_index: 1, difficulty: "Medium"
+  },
+  {
+    id: 305, topic: "Computer Fundamentals",
+    text: "What does the acronym ALU stand for in processor architecture?",
+    options: ["Arithmetic Logic Unit", "Advanced Linking Utility", "Application Layer Unit", "Array Line Unit"],
+    correct_index: 0, difficulty: "Easy"
+  },
+  {
+    id: 306, topic: "Computer Fundamentals",
+    text: "Which base numbering system utilizes digits 0-9 and letters A-F?",
+    options: ["Binary (Base 2)", "Octal (Base 8)", "Decimal (Base 10)", "Hexadecimal (Base 16)"],
+    correct_index: 3, difficulty: "Easy"
+  }
+];
+
 let appState = {
   student: null,
-  questions: [],
+  questions: DEFAULT_QUESTIONS,
   activeQuiz: null,
   activeQuizAnswers: [],
   undoStack: [],
@@ -66,7 +183,7 @@ function updateCloudStatus(connected, message) {
     text.textContent = message || 'Firebase Cloud Sync';
   } else {
     badge.classList.remove('connected');
-    text.textContent = message || 'Local C Engine';
+    text.textContent = message || 'Local Engine';
   }
 }
 
@@ -83,37 +200,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function checkProfile() {
+  // 1. Try Local C Server API
   try {
     const res = await fetch('/api/profile');
-    const data = await res.json();
-    if (data && data.is_registered) {
-      appState.student = data;
-      showApp();
-
-      // Check / Sync profile with Firestore
-      if (isFirebaseOnline && db) {
-        try {
-          const studentDocRef = doc(db, "students", data.student_id);
-          const snap = await getDoc(studentDocRef);
-          if (!snap.exists()) {
-            await setDoc(studentDocRef, {
-              name: data.name,
-              student_id: data.student_id,
-              last_seen: new Date().toISOString()
-            }, { merge: true });
-          }
-          updateCloudStatus(true, 'Firebase Synced');
-        } catch (e) {
-          console.warn("[Firebase] Profile sync check notice:", e);
-        }
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.is_registered) {
+        appState.student = data;
+        localStorage.setItem('upwise_student', JSON.stringify(data));
+        showApp();
+        syncStudentToFirestore(data);
+        await refreshData();
+        return;
       }
-
-      await refreshData();
-    } else {
-      document.getElementById('onboarding-view').classList.remove('hidden');
     }
   } catch (e) {
-    document.getElementById('onboarding-view').classList.remove('hidden');
+    // Expected on Vercel static deployment
+  }
+
+  // 2. Check LocalStorage fallback (for Vercel deployment)
+  const saved = localStorage.getItem('upwise_student');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.student_id) {
+        appState.student = parsed;
+        showApp();
+        syncStudentToFirestore(parsed);
+        await refreshData();
+        return;
+      }
+    } catch (e) {}
+  }
+
+  // Otherwise show onboarding form
+  document.getElementById('onboarding-view').classList.remove('hidden');
+}
+
+async function syncStudentToFirestore(student) {
+  if (isFirebaseOnline && db && student) {
+    try {
+      const studentDocRef = doc(db, "students", student.student_id);
+      await setDoc(studentDocRef, {
+        name: student.name,
+        student_id: student.student_id,
+        last_seen: new Date().toISOString()
+      }, { merge: true });
+      updateCloudStatus(true, 'Firebase Synced');
+    } catch (e) {
+      console.warn("[Firebase] Student cloud sync notice:", e);
+    }
   }
 }
 
@@ -149,21 +285,103 @@ function switchView(viewId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Progress and Analytics Calculation (used for both C server and Vercel cloud)
 async function refreshData() {
+  // 1. Try local C backend first
   try {
     const [progRes, lbRes] = await Promise.all([
       fetch('/api/progress'),
       fetch('/api/leaderboard')
     ]);
-    const progress = await progRes.json();
-    const leaderboard = await lbRes.json();
-
-    updateDashboard(progress);
-    updateProgressView(progress);
-    updateLeaderboard(leaderboard);
+    if (progRes.ok && lbRes.ok) {
+      const progress = await progRes.json();
+      const leaderboard = await lbRes.json();
+      updateDashboard(progress);
+      updateProgressView(progress);
+      updateLeaderboard(leaderboard);
+      return;
+    }
   } catch (e) {
-    console.error('Error refreshing local data:', e);
+    // Fallback to client-side + Firebase analytics for Vercel
   }
+
+  // 2. Client-side & Firebase calculations
+  calculateClientProgress();
+}
+
+function calculateClientProgress() {
+  const attempts = JSON.parse(localStorage.getItem('upwise_attempts') || '[]');
+  const myAttempts = appState.student 
+    ? attempts.filter(a => a.student_id === appState.student.student_id)
+    : attempts;
+
+  const topicsList = ["C Programming", "Data Structures", "Computer Fundamentals"];
+  const topicStats = topicsList.map(tName => {
+    const forTopic = myAttempts.filter(a => a.topic_name === tName);
+    const count = forTopic.length;
+    let avg = 0, best = 0, latest = 0;
+    if (count > 0) {
+      const sum = forTopic.reduce((acc, curr) => acc + (curr.score_percentage || 0), 0);
+      avg = Math.round(sum / count);
+      best = Math.max(...forTopic.map(a => a.score_percentage || 0));
+      latest = forTopic[forTopic.length - 1].score_percentage || 0;
+    }
+    let cat = "Not attempted";
+    if (count > 0) {
+      cat = (avg >= 80) ? "Proficient" : (avg >= 50) ? "Developing" : "Needs Improvement";
+    }
+    return {
+      topic_name: tName,
+      attempts_count: count,
+      average_percentage: avg,
+      best_percentage: best,
+      latest_percentage: latest,
+      category_label: cat,
+      has_attempts: count > 0
+    };
+  });
+
+  const totalQuizzes = myAttempts.length;
+  let overallAvg = 0, bestScore = 0;
+  if (totalQuizzes > 0) {
+    overallAvg = Math.round(myAttempts.reduce((acc, a) => acc + (a.score_percentage || 0), 0) / totalQuizzes);
+    bestScore = Math.max(...myAttempts.map(a => a.score_percentage || 0));
+  }
+
+  // Adaptive recommendation algorithm
+  let unattempted = topicStats.find(t => !t.has_attempts);
+  let recTopic = "C Programming";
+  let recReason = "Take your first quiz to calibrate personalized recommendations.";
+
+  if (unattempted) {
+    recTopic = unattempted.topic_name;
+    recReason = "Explore this topic to complete your diagnostic baseline.";
+  } else if (totalQuizzes > 0) {
+    const sorted = [...topicStats].sort((a, b) => a.average_percentage - b.average_percentage);
+    const weakest = sorted[0];
+    recTopic = weakest.topic_name;
+    if (weakest.average_percentage < 50) {
+      recReason = `Current average is ${weakest.average_percentage}%. Prioritize practice here to strengthen core foundations.`;
+    } else if (weakest.average_percentage < 80) {
+      recReason = `Current average is ${weakest.average_percentage}%. Continued practice will lift you into the Proficient band.`;
+    } else {
+      recReason = `Proficient across all modules! Revise ${recTopic} to target 100% mastery.`;
+    }
+  }
+
+  const prog = {
+    total_quizzes: totalQuizzes,
+    overall_average_percentage: overallAvg,
+    highest_score_percentage: bestScore,
+    overall_accuracy_percentage: overallAvg,
+    adaptive_recommended_topic: recTopic,
+    adaptive_recommendation_reason: recReason,
+    topics: topicStats,
+    recent_attempts: myAttempts.slice(-5).reverse()
+  };
+
+  updateDashboard(prog);
+  updateProgressView(prog);
 }
 
 function updateDashboard(prog) {
@@ -226,8 +444,12 @@ function updateProgressView(prog) {
     document.getElementById(`prog-info-${prefix}`).textContent = `Attempts: ${t.attempts_count} • Avg: ${t.average_percentage}% • Best: ${t.best_percentage}%`;
   });
 
-  if (prog.strongest_topic) document.getElementById('highlight-strong-topic').textContent = prog.strongest_topic;
-  if (prog.weakest_topic) document.getElementById('highlight-weak-topic').textContent = prog.weakest_topic;
+  const attemptedOnly = prog.topics.filter(t => t.has_attempts);
+  if (attemptedOnly.length > 0) {
+    const sorted = [...attemptedOnly].sort((a, b) => b.average_percentage - a.average_percentage);
+    document.getElementById('highlight-strong-topic').textContent = sorted[0].topic_name;
+    document.getElementById('highlight-weak-topic').textContent = sorted[sorted.length - 1].topic_name;
+  }
 }
 
 function updateLeaderboard(entries) {
@@ -259,7 +481,7 @@ function listenToCloudLeaderboard() {
         cloudEntries.push(docSnap.data());
       });
 
-      // Sort using same ranking rules (higher avg first, tie-break by completed quizzes)
+      // Sort using Quicksort logic (higher avg first, tie-break by completed quizzes)
       cloudEntries.sort((a, b) => {
         if (b.average_percentage !== a.average_percentage) {
           return b.average_percentage - a.average_percentage;
@@ -274,7 +496,7 @@ function listenToCloudLeaderboard() {
         }
       });
 
-      console.log(`[Firebase] Live cloud leaderboard synced (${cloudEntries.length} entries)`);
+      console.log(`[Firebase] Live cloud leaderboard updated (${cloudEntries.length} entries)`);
       updateLeaderboard(cloudEntries);
       updateCloudStatus(true, 'Firebase Live');
     }, (error) => {
@@ -287,27 +509,31 @@ function listenToCloudLeaderboard() {
 
 // Quiz Engine
 async function startQuiz(topic) {
+  let qList = DEFAULT_QUESTIONS.filter(q => q.topic === topic);
+
+  // If local server is available, try fetching
   try {
     const res = await fetch(`/api/questions?topic=${encodeURIComponent(topic)}`);
-    const qList = await res.json();
-    if (!qList || qList.length === 0) {
-      alert('No questions found for this topic.');
-      return;
+    if (res.ok) {
+      const serverQuestions = await res.json();
+      if (serverQuestions && serverQuestions.length > 0) {
+        qList = serverQuestions;
+      }
     }
-
-    appState.activeQuiz = { topic, questions: qList };
-    appState.activeQuizAnswers = new Array(qList.length).fill(-1);
-    appState.undoStack = [];
-    appState.currentQIndex = 0;
-    appState.secondsLeft = 180;
-
-    document.getElementById('quiz-topic-title').textContent = topic;
-    switchView('quiz-view');
-    renderQuizQuestion();
-    startTimer();
   } catch (e) {
-    console.error('Error starting quiz:', e);
+    // Standalone fallback
   }
+
+  appState.activeQuiz = { topic, questions: qList };
+  appState.activeQuizAnswers = new Array(qList.length).fill(-1);
+  appState.undoStack = [];
+  appState.currentQIndex = 0;
+  appState.secondsLeft = 180;
+
+  document.getElementById('quiz-topic-title').textContent = topic;
+  switchView('quiz-view');
+  renderQuizQuestion();
+  startTimer();
 }
 
 function startTimer() {
@@ -385,68 +611,105 @@ async function submitQuiz() {
     correct_keys: appState.activeQuiz.questions.map(q => q.correct_index)
   };
 
+  let result = null;
+
+  // 1. Try local C backend
   try {
-    // 1. Submit to local C backend
     const res = await fetch('/api/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const result = await res.json();
-    appState.lastAttempt = result;
-
-    // 2. Sync attempt & leaderboard to Firebase Firestore
-    if (isFirebaseOnline && db && appState.student) {
-      try {
-        // Save Attempt to Firestore
-        await addDoc(collection(db, "quizAttempts"), {
-          attempt_id: result.attempt_id,
-          student_id: appState.student.student_id,
-          student_name: appState.student.name,
-          topic_name: result.topic_name,
-          total_questions: result.total_questions,
-          correct_answers: result.correct_answers,
-          incorrect_answers: result.incorrect_answers,
-          unanswered: result.unanswered,
-          score_percentage: result.score_percentage,
-          performance_category: result.performance_category,
-          timestamp: result.timestamp,
-          user_answers: result.user_answers,
-          correct_answers_key: result.correct_answers_key,
-          created_at: new Date().toISOString()
-        });
-
-        // Update Student's Cloud Leaderboard entry
-        const lbDocRef = doc(db, "leaderboard", appState.student.student_id);
-        const lbSnap = await getDoc(lbDocRef);
-        let completed = 1;
-        let avg = result.score_percentage;
-        if (lbSnap.exists()) {
-          const oldData = lbSnap.data();
-          completed = (oldData.quizzes_completed || 0) + 1;
-          avg = Math.round(((oldData.average_percentage || 0) * (completed - 1) + result.score_percentage) / completed);
-        }
-
-        await setDoc(lbDocRef, {
-          student_id: appState.student.student_id,
-          name: appState.student.name,
-          average_percentage: avg,
-          quizzes_completed: completed,
-          last_active: new Date().toISOString()
-        }, { merge: true });
-
-        console.log("[Firebase] Successfully synced attempt to Cloud Firestore");
-        updateCloudStatus(true, 'Attempt Synced to Cloud');
-      } catch (fbErr) {
-        console.warn("[Firebase] Could not push attempt to cloud:", fbErr);
-      }
+    if (res.ok) {
+      result = await res.json();
     }
+  } catch (e) {}
 
-    showResults(result);
-    await refreshData();
-  } catch (e) {
-    console.error('Error submitting quiz:', e);
+  // 2. Client-side scoring if local backend is offline (e.g. on Vercel)
+  if (!result) {
+    let correct = 0, incorrect = 0, unanswered = 0;
+    for (let i = 0; i < payload.answers.length; i++) {
+      if (payload.answers[i] === -1) unanswered++;
+      else if (payload.answers[i] === payload.correct_keys[i]) correct++;
+      else incorrect++;
+    }
+    const total = payload.answers.length;
+    const pct = total > 0 ? Math.round((correct * 100) / total) : 0;
+    const cat = (pct >= 80) ? "Proficient" : (pct >= 50) ? "Developing" : "Needs Improvement";
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+    result = {
+      attempt_id: `ATT-${Date.now()}`,
+      student_id: appState.student ? appState.student.student_id : "UNKNOWN",
+      topic_name: payload.topic,
+      total_questions: total,
+      correct_answers: correct,
+      incorrect_answers: incorrect,
+      unanswered: unanswered,
+      score_percentage: pct,
+      performance_category: cat,
+      timestamp: timestamp,
+      user_answers: payload.answers,
+      correct_answers_key: payload.correct_keys
+    };
+
+    // Save to LocalStorage
+    const attempts = JSON.parse(localStorage.getItem('upwise_attempts') || '[]');
+    attempts.push(result);
+    localStorage.setItem('upwise_attempts', JSON.stringify(attempts));
   }
+
+  appState.lastAttempt = result;
+
+  // 3. Sync attempt & leaderboard to Firebase Firestore
+  if (isFirebaseOnline && db && appState.student) {
+    try {
+      await addDoc(collection(db, "quizAttempts"), {
+        attempt_id: result.attempt_id,
+        student_id: appState.student.student_id,
+        student_name: appState.student.name,
+        topic_name: result.topic_name,
+        total_questions: result.total_questions,
+        correct_answers: result.correct_answers,
+        incorrect_answers: result.incorrect_answers,
+        unanswered: result.unanswered,
+        score_percentage: result.score_percentage,
+        performance_category: result.performance_category,
+        timestamp: result.timestamp,
+        user_answers: result.user_answers,
+        correct_answers_key: result.correct_answers_key,
+        created_at: new Date().toISOString()
+      });
+
+      // Update Student's Cloud Leaderboard entry
+      const lbDocRef = doc(db, "leaderboard", appState.student.student_id);
+      const lbSnap = await getDoc(lbDocRef);
+      let completed = 1;
+      let avg = result.score_percentage;
+      if (lbSnap.exists()) {
+        const oldData = lbSnap.data();
+        completed = (oldData.quizzes_completed || 0) + 1;
+        avg = Math.round(((oldData.average_percentage || 0) * (completed - 1) + result.score_percentage) / completed);
+      }
+
+      await setDoc(lbDocRef, {
+        student_id: appState.student.student_id,
+        name: appState.student.name,
+        average_percentage: avg,
+        quizzes_completed: completed,
+        last_active: new Date().toISOString()
+      }, { merge: true });
+
+      console.log("[Firebase] Successfully saved attempt to Cloud Firestore");
+      updateCloudStatus(true, 'Attempt Synced to Cloud');
+    } catch (fbErr) {
+      console.warn("[Firebase] Cloud attempt sync notice:", fbErr);
+    }
+  }
+
+  showResults(result);
+  await refreshData();
 }
 
 function showResults(res) {
@@ -524,33 +787,36 @@ function setupEventListeners() {
     const name = document.getElementById('student-name').value.trim();
     const id = document.getElementById('student-id').value.trim();
 
-    // 1. Save to local C backend
-    const res = await fetch('/api/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, student_id: id })
-    });
-    const data = await res.json();
-    if (data.success) {
-      appState.student = { name, student_id: id, is_registered: true };
+    // 1. Try saving to local C backend
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, student_id: id })
+      });
+    } catch (e) {}
 
-      // 2. Save to Firebase Firestore
-      if (isFirebaseOnline && db) {
-        try {
-          await setDoc(doc(db, "students", id), {
-            name: name,
-            student_id: id,
-            registered_at: new Date().toISOString()
-          }, { merge: true });
-          updateCloudStatus(true, 'Firebase Connected');
-        } catch (fbErr) {
-          console.warn("[Firebase] Could not save student to cloud:", fbErr);
-        }
+    // 2. Save to LocalStorage (works everywhere, including Vercel)
+    const student = { name, student_id: id, is_registered: true };
+    appState.student = student;
+    localStorage.setItem('upwise_student', JSON.stringify(student));
+
+    // 3. Save to Firebase Firestore
+    if (isFirebaseOnline && db) {
+      try {
+        await setDoc(doc(db, "students", id), {
+          name: name,
+          student_id: id,
+          registered_at: new Date().toISOString()
+        }, { merge: true });
+        updateCloudStatus(true, 'Firebase Connected');
+      } catch (fbErr) {
+        console.warn("[Firebase] Could not save student to cloud:", fbErr);
       }
-
-      showApp();
-      await refreshData();
     }
+
+    showApp();
+    await refreshData();
   });
 
   // Start Topic Buttons
@@ -619,30 +885,33 @@ function setupEventListeners() {
     e.preventDefault();
     const name = document.getElementById('edit-name').value.trim();
     const id = document.getElementById('edit-id').value.trim();
-    const res = await fetch('/api/profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, student_id: id })
-    });
-    const data = await res.json();
-    if (data.success) {
-      appState.student = { name, student_id: id, is_registered: true };
 
-      if (isFirebaseOnline && db) {
-        try {
-          await setDoc(doc(db, "students", id), {
-            name: name,
-            student_id: id,
-            updated_at: new Date().toISOString()
-          }, { merge: true });
-        } catch (e) {
-          console.warn(e);
-        }
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, student_id: id })
+      });
+    } catch (e) {}
+
+    const student = { name, student_id: id, is_registered: true };
+    appState.student = student;
+    localStorage.setItem('upwise_student', JSON.stringify(student));
+
+    if (isFirebaseOnline && db) {
+      try {
+        await setDoc(doc(db, "students", id), {
+          name: name,
+          student_id: id,
+          updated_at: new Date().toISOString()
+        }, { merge: true });
+      } catch (e) {
+        console.warn(e);
       }
-
-      showApp();
-      await refreshData();
-      alert('Profile updated successfully!');
     }
+
+    showApp();
+    await refreshData();
+    alert('Profile updated successfully!');
   });
 }
