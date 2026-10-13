@@ -87,6 +87,30 @@ void app_cleanup(AppState *app) {
 
 static AppState g_app;
 
+#if defined(__EMSCRIPTEN__)
+EMSCRIPTEN_KEEPALIVE
+void set_google_user(const char *name, const char *student_id) {
+    if (!name || !student_id) return;
+    strncpy(g_app.current_student.name, name, sizeof(g_app.current_student.name) - 1);
+    g_app.current_student.name[sizeof(g_app.current_student.name) - 1] = '\0';
+    strncpy(g_app.current_student.student_id, student_id, sizeof(g_app.current_student.student_id) - 1);
+    g_app.current_student.student_id[sizeof(g_app.current_student.student_id) - 1] = '\0';
+    g_app.current_student.is_registered = true;
+
+    /* Populate UI inputs */
+    strncpy(g_app.name_input.text, g_app.current_student.name, sizeof(g_app.name_input.text) - 1);
+    strncpy(g_app.id_input.text, g_app.current_student.student_id, sizeof(g_app.id_input.text) - 1);
+
+    student_save_profile(g_app.profile_path, &g_app.current_student);
+    app_refresh_data(&g_app);
+
+    if (g_app.current_screen == SCREEN_PROFILE) {
+        g_app.current_screen = SCREEN_DASHBOARD;
+        g_app.active_nav_index = 0;
+    }
+}
+#endif
+
 static void update_draw_frame(void) {
     /* Update Quiz countdown timer */
     if (g_app.current_screen == SCREEN_QUIZ && g_app.quiz_session.is_active && !g_app.quiz_session.is_submitted) {
