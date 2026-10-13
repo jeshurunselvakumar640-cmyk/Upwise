@@ -143,8 +143,11 @@ static void update_draw_frame(void) {
 int main(void) {
     init_compat_layer();
 
-    /* Configure Raylib Window with Multi-sample Anti-Aliasing and High DPI */
+#if defined(__EMSCRIPTEN__)
+    SetConfigFlags(FLAG_VSYNC_HINT);
+#else
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT | FLAG_WINDOW_HIGHDPI);
+#endif
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Upwise | Learn. Practise. Progress.");
     SetTargetFPS(60);
 

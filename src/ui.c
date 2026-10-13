@@ -11,7 +11,7 @@ static bool s_fonts_loaded = false;
 void ui_init_fonts(void) {
     if (s_fonts_loaded) return;
 
-    /* Load system modern TrueType font for high-definition anti-aliased typography */
+    /* Load modern TrueType font with mipmaps for crystal-clear typography */
     const char *font_candidates[] = {
         "assets/segoeui.ttf",
         "C:/Windows/Fonts/segoeui.ttf",
@@ -21,36 +21,53 @@ void ui_init_fonts(void) {
 
     for (size_t i = 0; i < sizeof(font_candidates)/sizeof(font_candidates[0]); i++) {
         if (FileExists(font_candidates[i])) {
-            g_ui_font = LoadFontEx(font_candidates[i], 48, NULL, 0);
+            /* Regular UI Font: 28px base size (perfect for 10-22px UI text) */
+            g_ui_font = LoadFontEx(font_candidates[i], 28, NULL, 0);
             if (IsFontReady(g_ui_font)) {
+                GenTextureMipmaps(&g_ui_font.texture);
                 SetTextureFilter(g_ui_font.texture, TEXTURE_FILTER_BILINEAR);
                 s_fonts_loaded = true;
-                break;
             }
+
+            /* Title/Header Font: 44px base size for headers and metric cards */
+            g_ui_font_bold = LoadFontEx(font_candidates[i], 44, NULL, 0);
+            if (IsFontReady(g_ui_font_bold)) {
+                GenTextureMipmaps(&g_ui_font_bold.texture);
+                SetTextureFilter(g_ui_font_bold.texture, TEXTURE_FILTER_BILINEAR);
+            }
+
+            if (s_fonts_loaded) break;
         }
     }
 }
 
 void ui_close_fonts(void) {
-    if (s_fonts_loaded && IsFontReady(g_ui_font)) {
-        UnloadFont(g_ui_font);
+    if (s_fonts_loaded) {
+        if (IsFontReady(g_ui_font)) UnloadFont(g_ui_font);
+        if (IsFontReady(g_ui_font_bold)) UnloadFont(g_ui_font_bold);
         s_fonts_loaded = false;
     }
 }
 
 void ui_draw_text(const char *text, int posX, int posY, int fontSize, Color color) {
     if (!text || strlen(text) == 0) return;
-    if (s_fonts_loaded && IsFontReady(g_ui_font)) {
-        DrawTextEx(g_ui_font, text, (Vector2){ (float)posX, (float)posY }, (float)fontSize, 0.5f, color);
-    } else {
-        DrawText(text, posX, posY, fontSize, color);
+    if (s_fonts_loaded) {
+        Font font_to_use = (fontSize >= 24 && IsFontReady(g_ui_font_bold)) ? g_ui_font_bold : g_ui_font;
+        if (IsFontReady(font_to_use)) {
+            DrawTextEx(font_to_use, text, (Vector2){ (float)posX, (float)posY }, (float)fontSize, 0.2f, color);
+            return;
+        }
     }
+    DrawText(text, posX, posY, fontSize, color);
 }
 
 int ui_measure_text(const char *text, int fontSize) {
     if (!text || strlen(text) == 0) return 0;
-    if (s_fonts_loaded && IsFontReady(g_ui_font)) {
-        return (int)MeasureTextEx(g_ui_font, text, (float)fontSize, 0.5f).x;
+    if (s_fonts_loaded) {
+        Font font_to_use = (fontSize >= 24 && IsFontReady(g_ui_font_bold)) ? g_ui_font_bold : g_ui_font;
+        if (IsFontReady(font_to_use)) {
+            return (int)MeasureTextEx(font_to_use, text, (float)fontSize, 0.2f).x;
+        }
     }
     return MeasureText(text, fontSize);
 }

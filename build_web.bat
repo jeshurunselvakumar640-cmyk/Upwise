@@ -19,7 +19,7 @@ set FLAGS=-DPLATFORM_WEB -s USE_GLFW=3 -s ALLOW_MEMORY_GROWTH=1 -s FORCE_FILESYS
 
 echo [*] Compiling Upwise C application to WebAssembly...
 if not exist "web" mkdir web
-emcc %SRC% %RAYLIB_LIB% -o web/index.html %INCLUDES% %FLAGS%
+call emcc %SRC% %RAYLIB_LIB% -o web/index.html %INCLUDES% %FLAGS%
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] WebAssembly compilation failed! Check output above.
     exit /b %ERRORLEVEL%
