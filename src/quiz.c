@@ -4,6 +4,10 @@
 #include <string.h>
 #include <time.h>
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#endif
+
 const char* topic_id_to_name(TopicID id) {
     switch (id) {
         case TOPIC_C_PROGRAMMING: return "C Programming";
@@ -189,6 +193,11 @@ bool question_bank_save_to_file(const QuestionBank *bank, const char *filepath) 
     }
 
     fclose(fp);
+
+#if defined(__EMSCRIPTEN__)
+    EM_ASM(if (typeof FS !== 'undefined' && FS.syncfs) FS.syncfs(false, function(){}););
+#endif
+
     return true;
 }
 

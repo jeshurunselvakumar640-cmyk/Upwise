@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upwise | Learn. Practise. Progress.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0B1020;
+            --bg-secondary: #111A2E;
+            --card-bg: #172238;
+            --border-color: #253556;
+            --primary: #5B8CFF;
+            --primary-hover: #739EFF;
+            --accent: #8B5CF6;
+            --success: #34D399;
+            --text-primary: #F1F5F9;
+            --text-muted: #94A3B8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            padding: 12px;
+        }
+
+        /* Top Header Bar */
+        .top-navbar {
+            width: 100%;
+            max-width: 1240px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-tagline {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .tech-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            background: rgba(91, 140, 255, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(91, 140, 255, 0.3);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge.accent {
+            background: rgba(139, 92, 246, 0.12);
+            color: var(--accent);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .badge.success {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--success);
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-header {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-header:hover {
+            background: rgba(91, 140, 255, 0.15);
+            border-color: var(--primary);
+            color: #FFFFFF;
+        }
+
+        /* Canvas Container */
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            background: #000000;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1200 / 760;
+        }
+
+        canvas.emscripten {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border: 0;
+            outline: none;
+            background: #0B1020;
+            cursor: default;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, #172238 0%, #0B1020 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 50;
+            transition: opacity 0.4s ease;
+        }
+
+        .loader-spinner {
+            width: 54px;
+            height: 54px;
+            border: 3px solid rgba(91, 140, 255, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .loader-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .progress-bar-container {
+            width: 260px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.25s ease;
+        }
+
+        /* Error Banner */
+        #error-banner {
+            display: none;
+            position: absolute;
+            max-width: 90%;
+            background: rgba(251, 113, 133, 0.15);
+            border: 1px solid #FB7185;
+            border-radius: 10px;
+            padding: 16px 24px;
+            color: #FECDD3;
+            text-align: center;
+            z-index: 60;
+        }
+
+        /* Footer status bar */
+        .footer-bar {
+            width: 100%;
+            max-width: 1240px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding: 6px 12px;
+        }
+
+        .footer-bar a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .footer-bar a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .brand-tagline, .tech-badges {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <header class="top-navbar">
+        <div class="brand-section">
+            <svg viewBox="0 0 40 40" width="34" height="34">
+                <polygon points="6,26 20,14 34,26 20,20" fill="#8B5CF6"/>
+                <polygon points="6,16 20,4 34,16 20,10" fill="#5B8CFF"/>
+                <circle cx="20" cy="10" r="2.8" fill="#FFFFFF"/>
+            </svg>
+            <div>
+                <div class="brand-title">Upwise</div>
+                <div class="brand-tagline">Learn. Practise. Progress.</div>
+            </div>
+        </div>
+
+        <div class="tech-badges">
+            <span class="badge"><span class="badge-dot"></span>Pure C Core</span>
+            <span class="badge accent"><span class="badge-dot"></span>raylib v5.0</span>
+            <span class="badge success"><span class="badge-dot"></span>WebAssembly</span>
+            <span class="badge"><span class="badge-dot"></span>IndexedDB Storage</span>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-header" onclick="focusCanvas()" title="Click to send keyboard/mouse input to Upwise">
+                &#x2328; Focus App
+            </button>
+            <button class="btn-header" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+                &#x26F6; Fullscreen
+            </button>
+        </div>
+    </header>
+
+    <!-- Canvas Application Wrapper -->
+    <main class="canvas-wrapper" id="canvas-container">
+        <!-- Interactive Raylib Canvas -->
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay">
+            <div class="loader-spinner"></div>
+            <div class="loader-title">Loading Upwise</div>
+            <div class="loader-subtitle" id="status-text">Compiling WebAssembly Core &amp; Assets...</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Error Notification Overlay -->
+        <div id="error-banner">
+            <h3>Unable to Initialize WebAssembly</h3>
+            <p id="error-message">Please ensure WebGL 2.0 and WebAssembly are enabled in your browser settings.</p>
+        </div>
+    </main>
+
+    <!-- Footer Bar -->
+    <footer class="footer-bar">
+        <span>Upwise E-Learning &amp; Progress Tracking System &bull; Compiled from Pure C via Emscripten</span>
+        <span>Storage: <strong id="storage-status" style="color: var(--success);">IndexedDB Active</strong></span>
+    </footer>
+
+    <script>
+        function focusCanvas() {
+            var canvas = document.getElementById('canvas');
+            if (canvas) {
+                canvas.focus();
+            }
+        }
+
+        function toggleFullscreen() {
+            var container = document.getElementById('canvas-container');
+            if (!container) return;
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(function(err) {
+                    console.error("Fullscreen error:", err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Emscripten runtime Module configuration
+        var statusText = document.getElementById('status-text');
+        var progressBar = document.getElementById('progress-bar');
+        var loadingOverlay = document.getElementById('loading-overlay');
+        var errorBanner = document.getElementById('error-banner');
+        var errorMessage = document.getElementById('error-message');
+
+        var Module = {
+            preRun: [function() {
+                // Initialize IndexedDB persistence mounted at /data
+                try {
+                    FS.mkdir('/data');
+                } catch(e) {}
+                try {
+                    FS.mount(IDBFS, {}, '/data');
+                    FS.syncfs(true, function(err) {
+                        if (err) {
+                            console.warn("IDBFS initial sync warning:", err);
+                            document.getElementById('storage-status').textContent = 'In-Memory (Session)';
+                            document.getElementById('storage-status').style.color = '#FBBF24';
+                        } else {
+                            console.log("IDBFS storage mounted and synchronized successfully.");
+                            document.getElementById('storage-status').textContent = 'IndexedDB Persistent';
+                            document.getElementById('storage-status').style.color = '#34D399';
+                        }
+                    });
+                } catch(e) {
+                    console.warn("IDBFS mounting error, falling back to MEMFS:", e);
+                    document.getElementById('storage-status').textContent = 'In-Memory (Session)';
+                    document.getElementById('storage-status').style.color = '#FBBF24';
+                }
+            }],
+            postRun: [function() {
+                // Hide loading screen once application starts
+                if (loadingOverlay) {
+                    loadingOverlay.style.opacity = '0';
+                    setTimeout(function() {
+                        loadingOverlay.style.display = 'none';
+                        focusCanvas();
+                    }, 400);
+                }
+            }],
+            print: function(text) {
+                console.log(text);
+            },
+            printErr: function(text) {
+                console.warn(text);
+            },
+            canvas: (function() {
+                var canvas = document.getElementById('canvas');
+                canvas.addEventListener("webglcontextlost", function(e) {
+                    alert("WebGL context lost. Please reload the webpage.");
+                    e.preventDefault();
+                }, false);
+                return canvas;
+            })(),
+            setStatus: function(text) {
+                if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+                if (text === Module.setStatus.last.text) return;
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                var now = Date.now();
+                if (m) {
+                    text = m[1];
+                    var current = parseFloat(m[2]);
+                    var total = parseFloat(m[4]);
+                    var pct = Math.round((current / total) * 100);
+                    if (progressBar) progressBar.style.width = pct + '%';
+                }
+                if (statusText) statusText.textContent = text || 'Initializing raylib runtime...';
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function(left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left ? 'Preparing assets (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')...' : 'All assets loaded.');
+            },
+            onAbort: function(what) {
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                if (errorBanner) {
+                    errorBanner.style.display = 'block';
+                    if (errorMessage) errorMessage.textContent = "Application aborted: " + (what || "Unknown WebAssembly initialization error.");
+                }
+            }
+        };
+
+        window.onerror = function(event) {
+            console.error("Global error caught:", event);
+            if (loadingOverlay && loadingOverlay.style.display !== 'none') {
+                if (errorBanner) {
+                    errorBanner.style.display = 'block';
+                    if (errorMessage) errorMessage.textContent = "Runtime initialization error. Please reload.";
+                }
+            }
+        };
+    </script>
+    {{{ SCRIPT }}}
+</body>
+</html>

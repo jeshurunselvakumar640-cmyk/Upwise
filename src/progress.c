@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#endif
+
 void progress_calculate(const AttemptList *list, OverallProgress *out_progress) {
     if (!out_progress) return;
     memset(out_progress, 0, sizeof(OverallProgress));
@@ -290,5 +294,10 @@ bool attempts_append_to_file(const char *filepath, const QuizAttempt *attempt) {
     fprintf(fp, "\n");
 
     fclose(fp);
+
+#if defined(__EMSCRIPTEN__)
+    EM_ASM(if (typeof FS !== 'undefined' && FS.syncfs) FS.syncfs(false, function(){}););
+#endif
+
     return true;
 }

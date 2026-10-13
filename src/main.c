@@ -81,6 +81,65 @@ void app_cleanup(AppState *app) {
     quiz_session_cleanup(&app->quiz_session);
 }
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten/emscripten.h>
+#endif
+
+static AppState g_app;
+
+static void update_draw_frame(void) {
+    /* Update Quiz countdown timer */
+    if (g_app.current_screen == SCREEN_QUIZ && g_app.quiz_session.is_active && !g_app.quiz_session.is_submitted) {
+        float dt = GetFrameTime();
+        g_app.quiz_session.time_remaining -= dt;
+        if (g_app.quiz_session.time_remaining <= 0.0f) {
+            g_app.quiz_session.time_remaining = 0.0f;
+            /* Auto-submit on time expiry */
+            quiz_session_submit(&g_app.quiz_session, &g_app.last_attempt, g_app.current_student.student_id);
+            attempts_append_to_file(g_app.attempts_path, &g_app.last_attempt);
+            app_refresh_data(&g_app);
+            g_app.current_screen = SCREEN_RESULTS;
+        }
+    }
+
+    BeginDrawing();
+    ClearBackground(COLOR_BG_MAIN);
+
+    /* Render Current Screen */
+    switch (g_app.current_screen) {
+        case SCREEN_PROFILE:
+            screen_profile_update_draw(&g_app);
+            break;
+        case SCREEN_DASHBOARD:
+            draw_sidebar(&g_app);
+            screen_dashboard_update_draw(&g_app);
+            break;
+        case SCREEN_QUIZ:
+            screen_quiz_update_draw(&g_app);
+            break;
+        case SCREEN_RESULTS:
+            screen_results_update_draw(&g_app);
+            break;
+        case SCREEN_REVIEW:
+            screen_review_update_draw(&g_app);
+            break;
+        case SCREEN_PROGRESS:
+            draw_sidebar(&g_app);
+            screen_progress_update_draw(&g_app);
+            break;
+        case SCREEN_LEADERBOARD:
+            draw_sidebar(&g_app);
+            screen_leaderboard_update_draw(&g_app);
+            break;
+        case SCREEN_SETTINGS:
+            draw_sidebar(&g_app);
+            screen_settings_update_draw(&g_app);
+            break;
+    }
+
+    EndDrawing();
+}
+
 int main(void) {
     init_compat_layer();
 
@@ -91,65 +150,19 @@ int main(void) {
 
     ui_init();
 
-    AppState app;
-    app_init(&app);
+    app_init(&g_app);
 
-    while (!WindowShouldClose() && !app.should_close) {
-        /* Update Quiz countdown timer */
-        if (app.current_screen == SCREEN_QUIZ && app.quiz_session.is_active && !app.quiz_session.is_submitted) {
-            float dt = GetFrameTime();
-            app.quiz_session.time_remaining -= dt;
-            if (app.quiz_session.time_remaining <= 0.0f) {
-                app.quiz_session.time_remaining = 0.0f;
-                /* Auto-submit on time expiry */
-                quiz_session_submit(&app.quiz_session, &app.last_attempt, app.current_student.student_id);
-                attempts_append_to_file(app.attempts_path, &app.last_attempt);
-                app_refresh_data(&app);
-                app.current_screen = SCREEN_RESULTS;
-            }
-        }
-
-        BeginDrawing();
-        ClearBackground(COLOR_BG_MAIN);
-
-        /* Render Current Screen */
-        switch (app.current_screen) {
-            case SCREEN_PROFILE:
-                screen_profile_update_draw(&app);
-                break;
-            case SCREEN_DASHBOARD:
-                draw_sidebar(&app);
-                screen_dashboard_update_draw(&app);
-                break;
-            case SCREEN_QUIZ:
-                screen_quiz_update_draw(&app);
-                break;
-            case SCREEN_RESULTS:
-                screen_results_update_draw(&app);
-                break;
-            case SCREEN_REVIEW:
-                screen_review_update_draw(&app);
-                break;
-            case SCREEN_PROGRESS:
-                draw_sidebar(&app);
-                screen_progress_update_draw(&app);
-                break;
-            case SCREEN_LEADERBOARD:
-                draw_sidebar(&app);
-                screen_leaderboard_update_draw(&app);
-                break;
-            case SCREEN_SETTINGS:
-                draw_sidebar(&app);
-                screen_settings_update_draw(&app);
-                break;
-        }
-
-        EndDrawing();
+#if defined(__EMSCRIPTEN__)
+    emscripten_set_main_loop(update_draw_frame, 0, 1);
+#else
+    while (!WindowShouldClose() && !g_app.should_close) {
+        update_draw_frame();
     }
 
-    app_cleanup(&app);
+    app_cleanup(&g_app);
     ui_close_fonts();
     CloseWindow();
+#endif
     return 0;
 }
 

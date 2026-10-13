@@ -18,6 +18,7 @@ set OUT=Upwise.exe
 if "%1"=="clean" goto clean
 if "%1"=="test" goto test
 if "%1"=="run" goto run
+if "%1"=="web" goto web
 goto build
 
 :build
@@ -59,6 +60,10 @@ goto end
 call :build
 echo [*] Launching Upwise desktop application...
 start "" %OUT%
+goto end
+
+:web
+call build_web.bat
 goto end
 
 :clean

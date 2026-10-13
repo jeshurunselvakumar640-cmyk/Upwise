@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#endif
+
 void leaderboard_init(Leaderboard *lb) {
     if (!lb) return;
     memset(lb, 0, sizeof(Leaderboard));
@@ -93,6 +97,11 @@ bool leaderboard_save_to_file(const Leaderboard *lb, const char *filepath) {
     }
 
     fclose(fp);
+
+#if defined(__EMSCRIPTEN__)
+    EM_ASM(if (typeof FS !== 'undefined' && FS.syncfs) FS.syncfs(false, function(){}););
+#endif
+
     return true;
 }
 

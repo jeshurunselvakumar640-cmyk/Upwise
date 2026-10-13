@@ -13,6 +13,7 @@ void ui_init_fonts(void) {
 
     /* Load system modern TrueType font for high-definition anti-aliased typography */
     const char *font_candidates[] = {
+        "assets/segoeui.ttf",
         "C:/Windows/Fonts/segoeui.ttf",
         "C:/Windows/Fonts/arial.ttf",
         "C:/Windows/Fonts/calibri.ttf"

@@ -4,6 +4,10 @@
 #include <string.h>
 #include <ctype.h>
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#endif
+
 static void trim_whitespace(char *str) {
     if (!str) return;
     char *end;
@@ -83,6 +87,11 @@ bool student_save_profile(const char *filepath, const Student *student) {
     /* Simple, clean line-based format: NAME\nSTUDENT_ID\n */
     fprintf(fp, "%s\n%s\n", student->name, student->student_id);
     fclose(fp);
+
+#if defined(__EMSCRIPTEN__)
+    EM_ASM(if (typeof FS !== 'undefined' && FS.syncfs) FS.syncfs(false, function(){}););
+#endif
+
     return true;
 }
 
